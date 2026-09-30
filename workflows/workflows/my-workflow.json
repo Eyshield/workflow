@@ -1,7 +1,5 @@
 {
   "active": false,
-  "activeVersionId": null,
-  "checksum": "cfdda6be7d4184373aac710483089448ca54ca5ad36cbd6b205a3e2e444a72fc",
   "connections": {
     "Code in JavaScript": {
       "main": [
@@ -86,17 +84,6 @@
         [
           {
             "index": 0,
-            "node": "Wait",
-            "type": "main"
-          }
-        ]
-      ]
-    },
-    "Wait": {
-      "main": [
-        [
-          {
-            "index": 0,
             "node": "Loop Over Items",
             "type": "main"
           }
@@ -115,21 +102,8 @@
       ]
     }
   },
-  "createdAt": "2026-04-22T10:02:36.911Z",
   "description": null,
-  "homeProject": {
-    "createdAt": "2026-04-22T09:55:13.008Z",
-    "creatorId": "c19a21da-9ab2-4c4a-8d52-2c3d6e99c283",
-    "customTelemetryTags": [],
-    "description": null,
-    "icon": null,
-    "id": "tBWG7QJOPFst4IJJ",
-    "name": "Sam Ama <samy.amaouche008@gmail.com>",
-    "type": "personal",
-    "updatedAt": "2026-04-22T09:56:40.403Z"
-  },
   "id": "uy2xLVx0MYEb3CwY",
-  "isArchived": false,
   "meta": {
     "templateCredsSetupCompleted": true
   },
@@ -252,6 +226,22 @@
       "typeVersion": 4.4
     },
     {
+      "id": "d919de6c-4975-47a9-ab11-9f4591c23395",
+      "name": "Code in JavaScript",
+      "parameters": {
+        "jsCode": "const item = $input.first().json;\n\nconst destination = item[\"Email\"];\nconst firstName   = item[\"First Name\"];\nconst lastName    = item[\"Last Name\"];\nconst company     = item[\"Company Name\"];\n\nconst prompt = `You are a B2B copywriting expert specializing in cold emails for web development agencies.\n\nWrite a professional cold email in English targeting a mortgage/real estate professional using the following contact data:\n\ncontac info:\n  \"First Name\": ${firstName},\n  \"Last Name\": ${lastName},\n  \"Company Name\": ${company},\n  \"Email\": ${destination}\n\n\nUse ${firstName} to personalize the greeting and ${company} in the subject line.\n\n---\n\nCONTEXT:\nOur agency, TheDevs, builds custom websites and web applications for real estate and mortgage professionals. Our mission is to help them attract more qualified leads, showcase their services flawlessly, and convert visitors into clients — so they can close more deals.\n\n---\n\nTHE EMAIL MUST COVER THESE POINTS IN THIS ORDER:\n\n1. Strong hook — Open with a concrete problem: an outdated, slow, or unprofessional website drives away potential clients before any first contact is made.\n\n2. Importance of a great website — The website is the first impression, the 24/7 salesperson. In a competitive market, digital credibility is decisive in winning clients.\n\n3. Our agency's role — Position TheDevs as a strategic partner: we build complete websites and web apps with property/service listings, advanced search, optimized contact forms, CRM integration, team pages, client testimonials, and trust-building design.\n\n4. How we help close more deals — Better online visibility, more inbound leads, smooth user journey, prospect tracking tools, professional image that justifies fees.\n\n5. Frictionless CTA — Invite ${firstName} to a no-commitment, free 20-minute call to explore fit. No pressure, no hard sell.\n\n---\n\nWRITING CONSTRAINTS:\n- Tone: professional but human, direct without being aggressive\n- Length: max 200 words, short and punchy\n- No excessive technical jargon\n- No generic openers like \"I hope this finds you well\"\n- Subject line format: \"${company}\"\n`;\n\nreturn [{\n  json: {\n    model: \"gpt-oss:120b-cloud\",\n    prompt: prompt,\n    stream: false,\n    destination,\n    firstName,\n    lastName,\n    company,\n  }\n}];",
+        "language": "javaScript",
+        "mode": "runOnceForAllItems",
+        "notice": ""
+      },
+      "position": [
+        1200,
+        -224
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
       "id": "846f18ad-752a-4678-a905-57c7691ee84e",
       "name": "Code in JavaScript1",
       "parameters": {
@@ -312,66 +302,12 @@
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.2,
       "webhookId": "1c6b2549-8976-4fdc-9a87-593012b21e9c"
-    },
-    {
-      "id": "d919de6c-4975-47a9-ab11-9f4591c23395",
-      "name": "Code in JavaScript",
-      "parameters": {
-        "jsCode": "const item = $input.first().json;\n\nconst destination = item[\"Email\"];\nconst firstName   = item[\"First Name\"];\nconst lastName    = item[\"Last Name\"];\nconst company     = item[\"Company Name\"];\n\nconst prompt = `You are a B2B copywriting expert specializing in cold emails for web development agencies.\n\nWrite a professional cold email in English targeting a mortgage/real estate professional using the following contact data:\n\ncontac info:\n  \"First Name\": ${firstName},\n  \"Last Name\": ${lastName},\n  \"Company Name\": ${company},\n  \"Email\": ${destination}\n\n\nUse ${firstName} to personalize the greeting and ${company} in the subject line.\n\n---\n\nCONTEXT:\nOur agency, TheDevs, builds custom websites and web applications for real estate and mortgage professionals. Our mission is to help them attract more qualified leads, showcase their services flawlessly, and convert visitors into clients — so they can close more deals.\n\n---\n\nTHE EMAIL MUST COVER THESE POINTS IN THIS ORDER:\n\n1. Strong hook — Open with a concrete problem: an outdated, slow, or unprofessional website drives away potential clients before any first contact is made.\n\n2. Importance of a great website — The website is the first impression, the 24/7 salesperson. In a competitive market, digital credibility is decisive in winning clients.\n\n3. Our agency's role — Position TheDevs as a strategic partner: we build complete websites and web apps with property/service listings, advanced search, optimized contact forms, CRM integration, team pages, client testimonials, and trust-building design.\n\n4. How we help close more deals — Better online visibility, more inbound leads, smooth user journey, prospect tracking tools, professional image that justifies fees.\n\n5. Frictionless CTA — Invite ${firstName} to a no-commitment, free 20-minute call to explore fit. No pressure, no hard sell.\n\n---\n\nWRITING CONSTRAINTS:\n- Tone: professional but human, direct without being aggressive\n- Length: max 200 words, short and punchy\n- No excessive technical jargon\n- No generic openers like \"I hope this finds you well\"\n- Subject line format: \"${company}\"\n`;\n\nreturn [{\n  json: {\n    model: \"gpt-oss:120b-cloud\",\n    prompt: prompt,\n    stream: false,\n    destination,\n    firstName,\n    lastName,\n    company,\n  }\n}];",
-        "language": "javaScript",
-        "mode": "runOnceForAllItems",
-        "notice": ""
-      },
-      "position": [
-        1200,
-        -224
-      ],
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2
-    },
-    {
-      "disabled": false,
-      "id": "b022db09-a8fc-4bd5-bb3e-df3970848f55",
-      "name": "Wait",
-      "parameters": {
-        "amount": 5,
-        "resume": "timeInterval",
-        "unit": "seconds"
-      },
-      "position": [
-        2288,
-        128
-      ],
-      "type": "n8n-nodes-base.wait",
-      "typeVersion": 1.1,
-      "webhookId": "04c77365-b0cc-4dfb-9048-a1618ac3d812"
     }
   ],
   "pinData": {},
-  "scopes": [
-    "execution:reveal",
-    "workflow:create",
-    "workflow:delete",
-    "workflow:disableRedaction",
-    "workflow:enableRedaction",
-    "workflow:execute",
-    "workflow:execute-chat",
-    "workflow:export",
-    "workflow:import",
-    "workflow:list",
-    "workflow:move",
-    "workflow:publish",
-    "workflow:read",
-    "workflow:share",
-    "workflow:unpublish",
-    "workflow:unshare",
-    "workflow:update"
-  ],
   "settings": {
     "binaryMode": "separate",
     "executionOrder": "v1"
   },
-  "sharedWithProjects": [],
-  "tags": [],
-  "usedCredentials": []
+  "tags": []
 }
