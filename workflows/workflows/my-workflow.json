@@ -1,7 +1,7 @@
 {
   "active": false,
   "activeVersionId": null,
-  "checksum": "f6aa6435284d373d554717260df52e249e7c360086fdd486bfe47edce130ad53",
+  "checksum": "cfdda6be7d4184373aac710483089448ca54ca5ad36cbd6b205a3e2e444a72fc",
   "connections": {
     "Code in JavaScript": {
       "main": [
@@ -82,6 +82,17 @@
       ]
     },
     "Send a message1": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Wait",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Wait": {
       "main": [
         [
           {
@@ -317,6 +328,23 @@
       ],
       "type": "n8n-nodes-base.code",
       "typeVersion": 2
+    },
+    {
+      "disabled": false,
+      "id": "b022db09-a8fc-4bd5-bb3e-df3970848f55",
+      "name": "Wait",
+      "parameters": {
+        "amount": 5,
+        "resume": "timeInterval",
+        "unit": "seconds"
+      },
+      "position": [
+        2288,
+        128
+      ],
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "webhookId": "04c77365-b0cc-4dfb-9048-a1618ac3d812"
     }
   ],
   "pinData": {},
