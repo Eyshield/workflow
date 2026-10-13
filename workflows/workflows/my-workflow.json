@@ -315,7 +315,6 @@
       "typeVersion": 2
     },
     {
-      "disabled": false,
       "id": "b022db09-a8fc-4bd5-bb3e-df3970848f55",
       "name": "Wait",
       "parameters": {
