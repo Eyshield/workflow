@@ -84,6 +84,17 @@
         [
           {
             "index": 0,
+            "node": "Wait",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "index": 0,
             "node": "Loop Over Items",
             "type": "main"
           }
@@ -302,6 +313,23 @@
       ],
       "type": "n8n-nodes-base.code",
       "typeVersion": 2
+    },
+    {
+      "disabled": false,
+      "id": "7c8b6389-2990-49ba-b1dc-09ae613599e4",
+      "name": "Wait",
+      "parameters": {
+        "amount": 5,
+        "resume": "timeInterval",
+        "unit": "seconds"
+      },
+      "position": [
+        2304,
+        112
+      ],
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "webhookId": "541c74ba-8a10-4f5f-9665-a55a7703dadf"
     }
   ],
   "pinData": {},
