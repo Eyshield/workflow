@@ -1,35 +1,191 @@
 {
-  "active": false,
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "9116da20-4528-4899-bdde-f3f79d45f049",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "fileSelector": "/home/node/.n8n-files/apollo-contacts-export.csv",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1.1,
+      "position": [
+        208,
+        0
+      ],
+      "id": "9080f20f-ab2c-41f5-bdda-071008c8fd73",
+      "name": "Read/Write Files from Disk"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        416,
+        0
+      ],
+      "id": "2c5d32d7-2b72-4c26-ba51-0967680787c9",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "917fe6a2-5576-4541-9623-3b04973ad219",
+              "name": "First Name",
+              "value": "={{ $json[\"First Name\"] }}",
+              "type": "string"
+            },
+            {
+              "id": "354f862e-9d9d-4b98-b510-87fad0374e58",
+              "name": "Last Name",
+              "value": "={{ $json[\"Last Name\"] }}",
+              "type": "string"
+            },
+            {
+              "id": "59aaf99a-2e2c-4571-9927-87ff91713e79",
+              "name": "Company Name",
+              "value": "={{ $json[\"Company Name\"] }}",
+              "type": "string"
+            },
+            {
+              "id": "862c24a6-15a7-4548-9e4e-a4d77cccfcf0",
+              "name": "Email",
+              "value": "={{ $json.Email }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        816,
+        -224
+      ],
+      "id": "0f298849-807e-40df-8e60-bcead5876c7f",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://host.docker.internal:11434/api/generate",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"qwen3.5:397b-cloud\",\n  \"prompt\": {{ JSON.stringify($json.prompt) }},\n  \"stream\": false\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1568,
+        -224
+      ],
+      "id": "59413ded-80ac-4dab-8ef2-d549e1c04855",
+      "name": "HTTP Request",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "jsCode": "return $input.all().map(item => {\n  const raw = item.json.response ?? \"\";\n  const origin = $('Code in JavaScript').first().json;\n\n  const myName = \"Sam\";\n\n  const finalEmail = raw.replace(/\\[(My Name|Your Name)\\]/gi, myName);\n\n  const objetMatch = finalEmail.match(/Subject\\s*[:：]\\s*(.+)/i);\n  const objet = objetMatch ? objetMatch[1].trim() : \"\";\n\n  const email = origin.destination;\n\n  const lignes = finalEmail.split(/\\r?\\n/);\n  const indexObjet = lignes.findIndex(l => /Subject\\s*[:：]/i.test(l));\n\n  const contenu = lignes\n    .slice(indexObjet + 1)\n    .join(\"\\n\")\n    .trim();\n\n  return {\n    json: { objet, contenu, email }\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1872,
+        -224
+      ],
+      "id": "846f18ad-752a-4678-a905-57c7691ee84e",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        608,
+        0
+      ],
+      "id": "9b68ac6c-a3ea-45bc-8cdf-519e67022b17",
+      "name": "Loop Over Items",
+      "executeOnce": false,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.email }}",
+        "subject": "={{ $json.objet }}",
+        "message": "={{ $json.contenu.replace(/\\n/g, '<br>') }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        2160,
+        -224
+      ],
+      "id": "4f9e8948-00ac-457d-90bb-5c36f1bc98b4",
+      "name": "Send a message1",
+      "webhookId": "1c6b2549-8976-4fdc-9a87-593012b21e9c",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "nrsGk700zKgslwP7",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.first().json;\n\nconst destination = item[\"Email\"];\nconst firstName   = item[\"First Name\"];\nconst lastName    = item[\"Last Name\"];\nconst company     = item[\"Company Name\"];\n\nconst prompt = `You are a B2B copywriting expert specializing in cold emails for web development agencies.\n\nWrite a professional cold email in English targeting a mortgage/real estate professional using the following contact data:\n\ncontac info:\n  \"First Name\": ${firstName},\n  \"Last Name\": ${lastName},\n  \"Company Name\": ${company},\n  \"Email\": ${destination}\n\n\nUse ${firstName} to personalize the greeting and ${company} in the subject line.\n\n---\n\nCONTEXT:\nOur agency, TheDevs, builds custom websites and web applications for real estate and mortgage professionals. Our mission is to help them attract more qualified leads, showcase their services flawlessly, and convert visitors into clients — so they can close more deals.\n\n---\n\nTHE EMAIL MUST COVER THESE POINTS IN THIS ORDER:\n\n1. Strong hook — Open with a concrete problem: an outdated, slow, or unprofessional website drives away potential clients before any first contact is made.\n\n2. Importance of a great website — The website is the first impression, the 24/7 salesperson. In a competitive market, digital credibility is decisive in winning clients.\n\n3. Our agency's role — Position TheDevs as a strategic partner: we build complete websites and web apps with property/service listings, advanced search, optimized contact forms, CRM integration, team pages, client testimonials, and trust-building design.\n\n4. How we help close more deals — Better online visibility, more inbound leads, smooth user journey, prospect tracking tools, professional image that justifies fees.\n\n5. Frictionless CTA — Invite ${firstName} to a no-commitment, free 20-minute call to explore fit. No pressure, no hard sell.\n\n---\n\nWRITING CONSTRAINTS:\n- Tone: professional but human, direct without being aggressive\n- Length: max 200 words, short and punchy\n- No excessive technical jargon\n- No generic openers like \"I hope this finds you well\"\n- Subject line format: \"${company}\"\n`;\n\nreturn [{\n  json: {\n    model: \"gpt-oss:120b-cloud\",\n    prompt: prompt,\n    stream: false,\n    destination,\n    firstName,\n    lastName,\n    company,\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1200,
+        -224
+      ],
+      "id": "d919de6c-4975-47a9-ab11-9f4591c23395",
+      "name": "Code in JavaScript"
+    }
+  ],
+  "pinData": {},
   "connections": {
-    "Code in JavaScript": {
+    "When clicking ‘Execute workflow’": {
       "main": [
         [
           {
-            "index": 0,
-            "node": "HTTP Request",
-            "type": "main"
+            "node": "Read/Write Files from Disk",
+            "type": "main",
+            "index": 0
           }
         ]
       ]
     },
-    "Code in JavaScript1": {
+    "Read/Write Files from Disk": {
       "main": [
         [
           {
-            "index": 0,
-            "node": "Send a message1",
-            "type": "main"
-          }
-        ]
-      ]
-    },
-    "Edit Fields": {
-      "main": [
-        [
-          {
-            "index": 0,
-            "node": "Code in JavaScript",
-            "type": "main"
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
           }
         ]
       ]
@@ -38,9 +194,20 @@
       "main": [
         [
           {
-            "index": 0,
             "node": "Loop Over Items",
-            "type": "main"
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
           }
         ]
       ]
@@ -49,9 +216,20 @@
       "main": [
         [
           {
-            "index": 0,
             "node": "Code in JavaScript1",
-            "type": "main"
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "Send a message1",
+            "type": "main",
+            "index": 0
           }
         ]
       ]
@@ -61,20 +239,9 @@
         [],
         [
           {
-            "index": 0,
             "node": "Edit Fields",
-            "type": "main"
-          }
-        ]
-      ]
-    },
-    "Read/Write Files from Disk": {
-      "main": [
-        [
-          {
-            "index": 0,
-            "node": "Extract from File",
-            "type": "main"
+            "type": "main",
+            "index": 0
           }
         ]
       ]
@@ -83,231 +250,36 @@
       "main": [
         [
           {
-            "index": 0,
             "node": "Loop Over Items",
-            "type": "main"
+            "type": "main",
+            "index": 0
           }
         ]
       ]
     },
-    "When clicking ‘Execute workflow’": {
+    "Code in JavaScript": {
       "main": [
         [
           {
-            "index": 0,
-            "node": "Read/Write Files from Disk",
-            "type": "main"
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
           }
         ]
       ]
     }
   },
-  "description": null,
-  "id": "uy2xLVx0MYEb3CwY",
-  "meta": {
-    "templateCredsSetupCompleted": true
-  },
-  "name": "My workflow",
-  "nodeGroups": [],
-  "nodes": [
-    {
-      "id": "9116da20-4528-4899-bdde-f3f79d45f049",
-      "name": "When clicking ‘Execute workflow’",
-      "parameters": {
-        "notice": ""
-      },
-      "position": [
-        0,
-        0
-      ],
-      "type": "n8n-nodes-base.manualTrigger",
-      "typeVersion": 1
-    },
-    {
-      "id": "9080f20f-ab2c-41f5-bdda-071008c8fd73",
-      "name": "Read/Write Files from Disk",
-      "parameters": {
-        "cloudNotice": "",
-        "fileSelector": "/home/node/.n8n-files/apollo-contacts-export.csv",
-        "info": "",
-        "operation": "read",
-        "options": {}
-      },
-      "position": [
-        208,
-        0
-      ],
-      "type": "n8n-nodes-base.readWriteFile",
-      "typeVersion": 1.1
-    },
-    {
-      "id": "2c5d32d7-2b72-4c26-ba51-0967680787c9",
-      "name": "Extract from File",
-      "parameters": {
-        "binaryPropertyName": "data",
-        "operation": "csv",
-        "options": {}
-      },
-      "position": [
-        416,
-        0
-      ],
-      "type": "n8n-nodes-base.extractFromFile",
-      "typeVersion": 1.1
-    },
-    {
-      "id": "0f298849-807e-40df-8e60-bcead5876c7f",
-      "name": "Edit Fields",
-      "parameters": {
-        "assignments": {
-          "assignments": [
-            {
-              "id": "917fe6a2-5576-4541-9623-3b04973ad219",
-              "name": "First Name",
-              "type": "string",
-              "value": "={{ $json[\"First Name\"] }}"
-            },
-            {
-              "id": "354f862e-9d9d-4b98-b510-87fad0374e58",
-              "name": "Last Name",
-              "type": "string",
-              "value": "={{ $json[\"Last Name\"] }}"
-            },
-            {
-              "id": "59aaf99a-2e2c-4571-9927-87ff91713e79",
-              "name": "Company Name",
-              "type": "string",
-              "value": "={{ $json[\"Company Name\"] }}"
-            },
-            {
-              "id": "862c24a6-15a7-4548-9e4e-a4d77cccfcf0",
-              "name": "Email",
-              "type": "string",
-              "value": "={{ $json.Email }}"
-            }
-          ]
-        },
-        "duplicateItem": false,
-        "includeOtherFields": false,
-        "mode": "manual",
-        "options": {}
-      },
-      "position": [
-        816,
-        -224
-      ],
-      "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4
-    },
-    {
-      "alwaysOutputData": false,
-      "id": "59413ded-80ac-4dab-8ef2-d549e1c04855",
-      "name": "HTTP Request",
-      "parameters": {
-        "authentication": "none",
-        "contentType": "json",
-        "curlImport": "",
-        "infoMessage": "",
-        "jsonBody": "={\n  \"model\": \"qwen3.5:397b-cloud\",\n  \"prompt\": {{ JSON.stringify($json.prompt) }},\n  \"stream\": false\n}",
-        "method": "POST",
-        "options": {},
-        "provideSslCertificates": false,
-        "sendBody": true,
-        "sendHeaders": false,
-        "sendQuery": false,
-        "specifyBody": "json",
-        "url": "http://host.docker.internal:11434/api/generate"
-      },
-      "position": [
-        1568,
-        -224
-      ],
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.4
-    },
-    {
-      "id": "846f18ad-752a-4678-a905-57c7691ee84e",
-      "name": "Code in JavaScript1",
-      "parameters": {
-        "jsCode": "return $input.all().map(item => {\n  const raw = item.json.response ?? \"\";\n  const origin = $('Code in JavaScript').first().json;\n\n  const myName = \"Sam\";\n\n  const finalEmail = raw.replace(/\\[(My Name|Your Name)\\]/gi, myName);\n\n  const objetMatch = finalEmail.match(/Subject\\s*[:：]\\s*(.+)/i);\n  const objet = objetMatch ? objetMatch[1].trim() : \"\";\n\n  const email = origin.destination;\n\n  const lignes = finalEmail.split(/\\r?\\n/);\n  const indexObjet = lignes.findIndex(l => /Subject\\s*[:：]/i.test(l));\n\n  const contenu = lignes\n    .slice(indexObjet + 1)\n    .join(\"\\n\")\n    .trim();\n\n  return {\n    json: { objet, contenu, email }\n  };\n});",
-        "language": "javaScript",
-        "mode": "runOnceForAllItems",
-        "notice": ""
-      },
-      "position": [
-        1872,
-        -224
-      ],
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2
-    },
-    {
-      "executeOnce": false,
-      "id": "9b68ac6c-a3ea-45bc-8cdf-519e67022b17",
-      "name": "Loop Over Items",
-      "onError": "continueRegularOutput",
-      "parameters": {
-        "batchSize": 1,
-        "options": {},
-        "splitInBatchesNotice": ""
-      },
-      "position": [
-        608,
-        0
-      ],
-      "type": "n8n-nodes-base.splitInBatches",
-      "typeVersion": 3
-    },
-    {
-      "credentials": {
-        "gmailOAuth2": {
-          "id": "nrsGk700zKgslwP7",
-          "name": "Gmail account"
-        }
-      },
-      "id": "4f9e8948-00ac-457d-90bb-5c36f1bc98b4",
-      "name": "Send a message1",
-      "parameters": {
-        "authentication": "oAuth2",
-        "emailType": "html",
-        "message": "={{ $json.contenu.replace(/\\n/g, '<br>') }}",
-        "operation": "send",
-        "options": {
-          "appendAttribution": false
-        },
-        "resource": "message",
-        "sendTo": "={{ $json.email }}",
-        "subject": "={{ $json.objet }}"
-      },
-      "position": [
-        2160,
-        -224
-      ],
-      "type": "n8n-nodes-base.gmail",
-      "typeVersion": 2.2,
-      "webhookId": "1c6b2549-8976-4fdc-9a87-593012b21e9c"
-    },
-    {
-      "id": "d919de6c-4975-47a9-ab11-9f4591c23395",
-      "name": "Code in JavaScript",
-      "parameters": {
-        "jsCode": "const item = $input.first().json;\n\nconst destination = item[\"Email\"];\nconst firstName   = item[\"First Name\"];\nconst lastName    = item[\"Last Name\"];\nconst company     = item[\"Company Name\"];\n\nconst prompt = `You are a B2B copywriting expert specializing in cold emails for web development agencies.\n\nWrite a professional cold email in English targeting a mortgage/real estate professional using the following contact data:\n\ncontac info:\n  \"First Name\": ${firstName},\n  \"Last Name\": ${lastName},\n  \"Company Name\": ${company},\n  \"Email\": ${destination}\n\n\nUse ${firstName} to personalize the greeting and ${company} in the subject line.\n\n---\n\nCONTEXT:\nOur agency, TheDevs, builds custom websites and web applications for real estate and mortgage professionals. Our mission is to help them attract more qualified leads, showcase their services flawlessly, and convert visitors into clients — so they can close more deals.\n\n---\n\nTHE EMAIL MUST COVER THESE POINTS IN THIS ORDER:\n\n1. Strong hook — Open with a concrete problem: an outdated, slow, or unprofessional website drives away potential clients before any first contact is made.\n\n2. Importance of a great website — The website is the first impression, the 24/7 salesperson. In a competitive market, digital credibility is decisive in winning clients.\n\n3. Our agency's role — Position TheDevs as a strategic partner: we build complete websites and web apps with property/service listings, advanced search, optimized contact forms, CRM integration, team pages, client testimonials, and trust-building design.\n\n4. How we help close more deals — Better online visibility, more inbound leads, smooth user journey, prospect tracking tools, professional image that justifies fees.\n\n5. Frictionless CTA — Invite ${firstName} to a no-commitment, free 20-minute call to explore fit. No pressure, no hard sell.\n\n---\n\nWRITING CONSTRAINTS:\n- Tone: professional but human, direct without being aggressive\n- Length: max 200 words, short and punchy\n- No excessive technical jargon\n- No generic openers like \"I hope this finds you well\"\n- Subject line format: \"${company}\"\n`;\n\nreturn [{\n  json: {\n    model: \"gpt-oss:120b-cloud\",\n    prompt: prompt,\n    stream: false,\n    destination,\n    firstName,\n    lastName,\n    company,\n  }\n}];",
-        "language": "javaScript",
-        "mode": "runOnceForAllItems",
-        "notice": ""
-      },
-      "position": [
-        1200,
-        -224
-      ],
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2
-    }
-  ],
-  "pinData": {},
+  "active": false,
   "settings": {
-    "binaryMode": "separate",
-    "executionOrder": "v1"
+    "executionOrder": "v1",
+    "binaryMode": "separate"
   },
+  "versionId": "0b58b405-41ab-4509-b914-aca9e4e527cc",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "a9cbb337eb56cd3065f8ec6a18b3cac9b3a7c4412c4fcb8a0a3fd6c8e1b3ca35"
+  },
+  "nodeGroups": [],
+  "id": "uy2xLVx0MYEb3CwY",
   "tags": []
 }
