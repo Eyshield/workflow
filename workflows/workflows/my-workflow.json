@@ -315,7 +315,6 @@
       "typeVersion": 2
     },
     {
-      "disabled": false,
       "id": "65299118-92fb-4420-baa1-0c0baea43cfc",
       "name": "Wait",
       "parameters": {
@@ -325,7 +324,7 @@
       },
       "position": [
         2384,
-        -224
+        112
       ],
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
